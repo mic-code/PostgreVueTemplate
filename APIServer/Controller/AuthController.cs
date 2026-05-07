@@ -1,10 +1,11 @@
-﻿using Models;
+using Models;
 using Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Services;
 using Identity;
+using System.ComponentModel.DataAnnotations;
 
 namespace Controllers;
 
@@ -216,4 +217,44 @@ public class AuthController : ControllerBase
             return BadRequest();
         }
     }
+}
+
+public class SignInRequest
+{
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; } = string.Empty;
+    
+    [Required]
+    public string Password { get; set; } = string.Empty;
+}
+
+public class ConfirmEmailRequest
+{
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; } = string.Empty;
+    
+    [Required]
+    public string Token { get; set; } = string.Empty;
+}
+
+public class PasswordResetRequest
+{
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; } = string.Empty;
+    
+    [Required]
+    public string Token { get; set; } = string.Empty;
+    
+    [Required]
+    public string Password { get; set; } = string.Empty;
+}
+
+public class ResetRequest
+{
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; } = string.Empty;
 }

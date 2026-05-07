@@ -23,6 +23,7 @@ Rename-Item -Path ".\$BackendName\$BackendName.csproj" -NewName "$NewBackendName
 # update code
 (Get-Content ".\$BackendName\Program.cs").Replace("$Namespace", "$ProjectName") | Set-Content ".\$BackendName\Program.cs"
 (Get-Content ".\$BackendName\appsettings.json").Replace("jwt-key", "$JwtKey") | Set-Content ".\$BackendName\appsettings.json"
+(Get-Content ".\$BackendName\appsettings.Development.json").Replace("PostgreVueTemplateDB", "${ProjectName}DB") | Set-Content ".\$BackendName\appsettings.Development.json"
 Rename-Item -Path ".\$BackendName\$BackendName.http" -NewName "$NewBackendName.http"
 
 # backend project folder

@@ -1,0 +1,6 @@
+node_modules/
+dist/
+StartAiderGemini25Pro.ps1
+LoginGoogleCloud.ps1
+StartAiderDeepSeek.ps1
+.aider*
