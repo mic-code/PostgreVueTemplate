@@ -1,0 +1,6 @@
+@BaseUrl = http://localhost:8088/api
+
+GET {{BaseUrl}}/test/IsUp
+Accept: application/json
+
+###

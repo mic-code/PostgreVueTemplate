@@ -1,0 +1,8 @@
+services:
+  postgreapi-template:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - DB_CONN=Host=postgres;Database=TemplateDB;Username=postgres;Password=password
+    # ports:
+    #   - "8080"
