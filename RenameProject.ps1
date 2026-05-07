@@ -1,25 +1,40 @@
 $ProjectName = Read-Host "Enter Project Name"
-$TemplateName = "PostgreAPI-Template"
-$Namespace = "PostgreAPI_Template"
+$TemplateName = "PostgreVueTemplate"
+$TemplateFrontend = "PostgreVueTemplate-Frontend"
+$BackendName = "APIServer"
+$NewBackendName = "$ProjectName-API"
+$Namespace = "PostgreVue_Template"
 $JwtKey = "qwertyuiop"
 
-#solution and project
-(Get-Content "$TemplateName.sln").Replace("$TemplateName", "$ProjectName") | Set-Content "$TemplateName.sln"
+# --- Solution file ---
+# Update project name and path references inside the .sln
+(Get-Content "$TemplateName.sln").Replace("$BackendName", "$NewBackendName") | Set-Content "$TemplateName.sln"
 Rename-Item -Path "$TemplateName.sln" -NewName "$ProjectName.sln"
-Rename-Item -Path ".\$TemplateName\$TemplateName.csproj" -NewName "$ProjectName.csproj"
 
-#update docker
-(Get-Content ".\docker-compose.override.yml").Replace("$TemplateName", "$ProjectName") | Set-Content ".\docker-compose.override.yml"
-(Get-Content ".\docker-compose.yml").Replace("$TemplateName", "$ProjectName") | Set-Content ".\docker-compose.yml"
-(Get-Content ".\$TemplateName\Dockerfile").Replace("$TemplateName", "$ProjectName") | Set-Content ".\$TemplateName\Dockerfile"
+# --- Backend project ---
+Rename-Item -Path ".\$BackendName\$BackendName.csproj" -NewName "$NewBackendName.csproj"
 
-#update code
-(Get-Content ".\$TemplateName\program.cs").Replace("$Namespace", "$ProjectName") | Set-Content ".\$TemplateName\program.cs"
-(Get-Content ".\$TemplateName\appsettings.json").Replace("jwt-key", "$JwtKey") | Set-Content ".\$TemplateName\appsettings.json"
-Rename-Item -Path ".\$TemplateName\$TemplateName.http" -NewName "$ProjectName.http"
+# update docker
+(Get-Content ".\docker-compose.override.yml").Replace("postgreapi-template", "$ProjectName".ToLower()) | Set-Content ".\docker-compose.override.yml"
+(Get-Content ".\docker-compose.yml").Replace("postgreapi-template", "$ProjectName".ToLower()).Replace("postgreapitemplate", "$ProjectName".ToLower()).Replace("postgreAPI-network", "$ProjectName-network").Replace("$BackendName", "$NewBackendName") | Set-Content ".\docker-compose.yml"
+(Get-Content ".\docker-compose.dcproj").Replace("postgre-api-template", "$ProjectName".ToLower()) | Set-Content ".\docker-compose.dcproj"
+(Get-Content ".\$BackendName\Dockerfile").Replace("$BackendName", "$NewBackendName") | Set-Content ".\$BackendName\Dockerfile"
 
-#project folder
-Rename-Item -Path "$TemplateName" -NewName "$ProjectName"
+# update code
+(Get-Content ".\$BackendName\Program.cs").Replace("$Namespace", "$ProjectName") | Set-Content ".\$BackendName\Program.cs"
+(Get-Content ".\$BackendName\appsettings.json").Replace("jwt-key", "$JwtKey") | Set-Content ".\$BackendName\appsettings.json"
+Rename-Item -Path ".\$BackendName\$BackendName.http" -NewName "$NewBackendName.http"
 
-#clean up
+# backend project folder
+Rename-Item -Path "$BackendName" -NewName "$NewBackendName"
+
+# --- Frontend ---
+# update content references
+(Get-Content ".\$TemplateFrontend\index.html").Replace("Frontend", "$ProjectName") | Set-Content ".\$TemplateFrontend\index.html"
+(Get-Content ".\$TemplateFrontend\package.json").Replace('"frontend"', "`"$ProjectName`"").Replace('"Frontend"', "`"$ProjectName`"") | Set-Content ".\$TemplateFrontend\package.json"
+
+# frontend folder
+Rename-Item -Path "$TemplateFrontend" -NewName "$ProjectName-Frontend"
+
+# --- Clean up ---
 Remove-Item -Path ".\RenameProject.ps1"
