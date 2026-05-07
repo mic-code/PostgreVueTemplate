@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models;
-using Service;
+using Services;
 
 
 namespace Controllers;
@@ -43,13 +43,6 @@ public class TestController : ControllerBase
         return Ok(User.Identity.Name);
     }
 
-    [HttpGet]
-    [Authorize(Policy = AppPermission.Manage)]
-    public async Task<IActionResult> IsUpClaim()
-    {
-        return Ok();
-    }
-
     [HttpPost]
     public async Task<IActionResult> TestDBWrite(TestDBWriteRequest request)
     {
@@ -77,7 +70,6 @@ public class TestController : ControllerBase
         }
         return Ok(item);
     }
-
 
     public record TestDBWriteRequest(string key, string value);
 }

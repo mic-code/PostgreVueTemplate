@@ -4,12 +4,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using Service;
 using System.Security.Claims;
 using System.Text;
 using Utility;
+using Services;
 
-namespace APIServer
+namespace PropertyAPI
 {
     public class Program
     {
@@ -96,9 +96,21 @@ namespace APIServer
             //builder.Services.TryAddSingleton(typeof(ILogger<>), typeof(LoggerEx<>));
             builder.Services.AddSingleton<JWTHelper>();
             builder.Services.AddSingleton<UserService>();
+            builder.Services.AddSingleton<EmailService>();
 
-            builder.Services.AddSwaggerGen();
-            builder.Services.AddOpenApi();
+            // Storage service
+            builder.Services.AddSingleton<IStorageServiceFactory, StorageServiceFactory>();
+
+
+            //if (builder.Environment.IsDevelopment())
+            {
+                builder.Services.AddSwaggerGen();
+                builder.Services.AddOpenApi();
+            }
+            //else
+            {
+                builder.Services.AddResponseCompression();
+            }
 
             builder.Services.AddCors(options =>
             {
@@ -163,16 +175,36 @@ namespace APIServer
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+            else
+            {
+                app.UseResponseCompression();
+                app.UseHttpsRedirection();
+                app.UseDefaultFiles();
+                app.UseStaticFiles();
+                app.MapFallbackToFile("index.html");
+            }
+
+            // Serve uploaded files from /uploads
+            var uploadsPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot", "uploads");
+            if (!Directory.Exists(uploadsPath))
+            {
+                Directory.CreateDirectory(uploadsPath);
+            }
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(uploadsPath),
+                RequestPath = "/uploads"
+            });
 
             app.UseCors("AllowAll");
             app.UseAuthorization();
             //app.MapHub<UserHub>("/api/userhub", options => { options.AllowStatefulReconnects = true; });
             app.MapControllers();
 
-
-            //_ = app.Services.GetService<WorkerService>();
-
             app.Run();
         }
     }
 }
+
+// Make Program class accessible for integration testing
+public partial class Program { }
