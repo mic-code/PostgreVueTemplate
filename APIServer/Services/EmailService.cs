@@ -8,32 +8,52 @@ namespace Services
     public class EmailService
     {
         readonly ILogger logger;
-        readonly IAmazonSimpleEmailServiceV2 sesClient;
+        readonly IAmazonSimpleEmailServiceV2? sesClient;
+        readonly bool isDevelopment;
+
+        // In-memory store for dev mode: captures tokens so tests can retrieve them
+        static readonly Dictionary<string, DevEmailRecord> devEmailStore = new();
+
+        public static Dictionary<string, DevEmailRecord> DevEmailStore => devEmailStore;
 
         string fromAddress => "nexus@im-booth.com";
-        string confirmHtml;
-        string forgetHtml;
-        string unitInfoHtml;
+        string? confirmHtml;
+        string? forgetHtml;
+        string? unitInfoHtml;
 
         public EmailService(ILogger<EmailService> logger, IWebHostEnvironment environment)
         {
             this.logger = logger;
-            var endpoint = RegionEndpoint.GetBySystemName(GlobalVar.SESEndpointString);
-            sesClient = new AmazonSimpleEmailServiceV2Client(GlobalVar.SESAccessKey, GlobalVar.SESSecretKey, endpoint);
+            isDevelopment = environment.IsDevelopment();
 
-            //logger.LogInformation(environment.WebRootPath);
-            var confirmPath = Path.Combine(environment.WebRootPath, "confirm.html");
-            confirmHtml = File.ReadAllText(confirmPath);
+            if (isDevelopment)
+            {
+                logger.LogInformation("EmailService running in Development mode - emails will be captured, not sent");
+            }
+            else
+            {
+                var endpoint = RegionEndpoint.GetBySystemName(GlobalVar.SESEndpointString);
+                sesClient = new AmazonSimpleEmailServiceV2Client(GlobalVar.SESAccessKey, GlobalVar.SESSecretKey, endpoint);
 
-            var forgetPath = Path.Combine(environment.WebRootPath, "forget.html");
-            forgetHtml = File.ReadAllText(forgetPath);
+                var confirmPath = Path.Combine(environment.WebRootPath, "confirm.html");
+                confirmHtml = File.ReadAllText(confirmPath);
 
-            var unitInfoPath = Path.Combine(environment.WebRootPath, "unit-info.html");
-            unitInfoHtml = File.ReadAllText(unitInfoPath);
+                var forgetPath = Path.Combine(environment.WebRootPath, "forget.html");
+                forgetHtml = File.ReadAllText(forgetPath);
+
+                var unitInfoPath = Path.Combine(environment.WebRootPath, "unit-info.html");
+                unitInfoHtml = File.ReadAllText(unitInfoPath);
+            }
         }
 
         public async Task<string> SendEmail(string toEmailAddresses, string? subject, string? htmlContent)
         {
+            if (isDevelopment)
+            {
+                logger.LogInformation("DEV MODE: Email to {email} with subject '{subject}' captured (not sent)", toEmailAddresses, subject);
+                return await Task.FromResult("dev-mode-" + Guid.NewGuid().ToString());
+            }
+
             return await SendEmailInternal(new List<string> { toEmailAddresses }, subject, htmlContent);
         }
 
@@ -126,8 +146,35 @@ namespace Services
         public async Task SendConfirmEmail(string email, string url)
         {
             logger.LogInformation("SendConfirmEmail");
+
+            if (isDevelopment)
+            {
+                // Extract token from URL for dev storage
+                // URL may be relative, so handle both cases
+                string? token = null;
+                try
+                {
+                    var uri = new Uri(url);
+                    var queryParams = System.Web.HttpUtility.ParseQueryString(uri.Query);
+                    token = queryParams["token"];
+                }
+                catch (UriFormatException)
+                {
+                    // Relative URL - parse query string directly
+                    var queryStart = url.IndexOf('?');
+                    if (queryStart >= 0)
+                    {
+                        var queryParams = System.Web.HttpUtility.ParseQueryString(url.Substring(queryStart));
+                        token = queryParams["token"];
+                    }
+                }
+                devEmailStore[email] = new DevEmailRecord(email, token, "confirm");
+                logger.LogInformation("DEV MODE: Confirm email token for {email}: {token}", email, token);
+                return;
+            }
+
             string[] words = email.Split('@');
-            var content = confirmHtml.Replace("{USER_NAME}", words[0]);
+            var content = confirmHtml!.Replace("{USER_NAME}", words[0]);
             content = content.Replace("{CONFIRM_LINK}", url);
             content = content.Replace("{SERVICE_NAME}", GlobalVar.ServiceName);
 
@@ -138,8 +185,34 @@ namespace Services
         {
             logger.LogInformation("SendForgetPasswordEmail");
 
+            if (isDevelopment)
+            {
+                // Extract token from URL for dev storage
+                // URL may be relative, so handle both cases
+                string? token = null;
+                try
+                {
+                    var uri = new Uri(url);
+                    var queryParams = System.Web.HttpUtility.ParseQueryString(uri.Query);
+                    token = queryParams["token"];
+                }
+                catch (UriFormatException)
+                {
+                    // Relative URL - parse query string directly
+                    var queryStart = url.IndexOf('?');
+                    if (queryStart >= 0)
+                    {
+                        var queryParams = System.Web.HttpUtility.ParseQueryString(url.Substring(queryStart));
+                        token = queryParams["token"];
+                    }
+                }
+                devEmailStore[email] = new DevEmailRecord(email, token, "reset");
+                logger.LogInformation("DEV MODE: Reset password token for {email}: {token}", email, token);
+                return;
+            }
+
             string[] words = email.Split('@');
-            var content = forgetHtml.Replace("{USER_NAME}", words[0]);
+            var content = forgetHtml!.Replace("{USER_NAME}", words[0]);
             content = content.Replace("{RESET_LINK}", url);
             content = content.Replace("{SERVICE_NAME}", GlobalVar.ServiceName);
 
@@ -200,6 +273,20 @@ namespace Services
             content = content.Replace("{UNIT_STATUS}", $"<span class=\"status-badge {statusClass}\">{status}</span>");
 
             await SendEmail(email, $"{estateName} - {unitName}", content);
+        }
+    }
+
+    public class DevEmailRecord
+    {
+        public string Email { get; set; }
+        public string? Token { get; set; }
+        public string Type { get; set; }
+
+        public DevEmailRecord(string email, string? token, string type)
+        {
+            Email = email;
+            Token = token;
+            Type = type;
         }
     }
 }

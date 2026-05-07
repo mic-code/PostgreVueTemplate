@@ -1,4 +1,4 @@
-﻿using Identity;
+using Identity;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 
@@ -29,7 +29,8 @@ public class UserService
         role = await roleManager.FindByNameAsync(roleName);
 
         await roleManager.AddClaimAsync(role, new Claim(nameof(AppPermission), AppPermission.Manage));
-        foreach (var user in userManager.Users)
+        var users = userManager.Users.ToList();
+        foreach (var user in users)
             await userManager.AddToRoleAsync(user, role.Name);
     }
 }

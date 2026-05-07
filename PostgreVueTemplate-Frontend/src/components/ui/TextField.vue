@@ -15,6 +15,7 @@ defineProps({
 	autocomplete: String,
 	min: [String, Number],
 	max: [String, Number],
+	ariaLabel: String,
 });
 
 const emit = defineEmits(["update:modelValue", "change", "click:append", "focus", "blur", "keydown"]);
@@ -73,6 +74,7 @@ function focusInput()
 			:autocomplete="autocomplete"
 			:min="min"
 			:max="max"
+			:aria-label="ariaLabel"
 		>
 		<Button :type="appendButtonType" v-if="appendIcon" :round="round" :icon="appendIcon" variant="flat" @click.stop="$emit('click:append', $event)"></Button>
 		<slot></slot>

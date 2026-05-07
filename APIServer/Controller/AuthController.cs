@@ -48,7 +48,7 @@ public class AuthController : ControllerBase
 
             if (result.Succeeded)
             {
-                SendConfirmEmail(user);
+                await SendConfirmEmailAsync(user);
                 logger.LogInformation("User {userName} registered", request.Email);
                 return Ok(AppResult.Success);
             }
@@ -60,7 +60,7 @@ public class AuthController : ControllerBase
         {
             if (!user.EmailConfirmed)
             {
-                SendConfirmEmail(user);
+                await SendConfirmEmailAsync(user);
                 logger.LogInformation("Account {userName} exist but not confirmed, confirmation email sent", request.Email);
                 return Ok(AppResult.UserExistNotConfirmed);
             }
@@ -126,7 +126,8 @@ public class AuthController : ControllerBase
             var token = await userManager.GeneratePasswordResetTokenAsync(user);
 
             var payload = new { email = user.Email, token };
-            var link = $"{GlobalVar.Endpoint}/resetPass{URLUtility.GetQueryString(payload)}";
+            var endpoint = GlobalVar.Endpoint ?? "http://localhost:3050";
+            var link = $"{endpoint}/resetPass{URLUtility.GetQueryString(payload)}";
 
             await emailService.SendForgetPasswordEmail(user.Email, link);
 
@@ -138,7 +139,7 @@ public class AuthController : ControllerBase
         }
     }
 
-    async void SendConfirmEmail(AppUser user)
+    async Task SendConfirmEmailAsync(AppUser user)
     {
         var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
         var link = GetLink(new { token, email = user.Email });
@@ -149,7 +150,8 @@ public class AuthController : ControllerBase
 
     string GetLink(object payload)
     {
-        return $"{GlobalVar.Endpoint}/confirmEmail{URLUtility.GetQueryString(payload)}";
+        var endpoint = GlobalVar.Endpoint ?? "http://localhost:3050";
+        return $"{endpoint}/confirmEmail{URLUtility.GetQueryString(payload)}";
     }
 
     [HttpPost]

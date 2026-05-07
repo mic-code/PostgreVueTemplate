@@ -62,7 +62,7 @@ async function handleForgetPass()
 						:placeholder="$t('enterEmailAddress')"
 						icon="i-mdi-email-outline"
 						variant="outlined"
-						aria-label="email"
+						ariaLabel="email"
 						required
 						pt-1
 					/>
@@ -86,7 +86,7 @@ async function handleForgetPass()
 						:placeholder="$t('enterPassword')"
 						icon="i-mdi-lock-outline"
 						variant="outlined"
-						aria-label="password"
+						ariaLabel="password"
 						required
 						@click:append="showPassword=!showPassword"
 					/>

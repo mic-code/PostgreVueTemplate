@@ -26,6 +26,6 @@ app.use(pinia);
 // realtimeStore.startService();
 
 const authStore = useAuthStore();
-authStore.checkLogin();
+authStore.checkLoginNoRedirect();
 
 app.mount("#app");

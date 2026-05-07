@@ -1,5 +1,21 @@
 {
   "IncorrectCredential": "Incorrect credential",
   "NeedEmailConfirm": "Account not activated",
-  "LangName":"English"
+  "email": "Email",
+  "password": "Password",
+  "signin": "Sign In",
+  "register": "Register",
+  "forgotPass": "Forgot Password",
+  "enterEmailAddress": "Enter email address",
+  "enterPassword": "Enter password",
+  "confirmPassword": "Confirm Password",
+  "confirmPasswordPlaceholder": "Re-enter password",
+  "sendResetLink": "Send Reset Link",
+  "backToSignin": "Back to Sign In",
+  "resetPassword": "Reset Password",
+  "newPassword": "New Password",
+  "enterNewPassword": "Enter new password",
+  "confirmEmail": "Confirm Email",
+  "requestNewResetLink": "Request new reset link",
+  "LangName": "English"
 }

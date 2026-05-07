@@ -1,6 +1,21 @@
 {
   "IncorrectCredential": "不正確的憑證",
   "NeedEmailConfirm": "帳戶未激活",
-  "LangName":"HK"
-
+  "email": "電郵",
+  "password": "密碼",
+  "signin": "登入",
+  "register": "註冊",
+  "forgotPass": "忘記密碼",
+  "enterEmailAddress": "輸入電郵地址",
+  "enterPassword": "輸入密碼",
+  "confirmPassword": "確認密碼",
+  "confirmPasswordPlaceholder": "再次輸入密碼",
+  "sendResetLink": "發送重設連結",
+  "backToSignin": "返回登入",
+  "resetPassword": "重設密碼",
+  "newPassword": "新密碼",
+  "enterNewPassword": "輸入新密碼",
+  "confirmEmail": "確認電郵",
+  "requestNewResetLink": "請求新的重設連結",
+  "LangName": "HK"
 }

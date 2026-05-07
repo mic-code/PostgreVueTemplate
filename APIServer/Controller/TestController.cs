@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models;
 using Services;
+using Utility;
 
 
 namespace Controllers;
@@ -69,6 +70,34 @@ public class TestController : ControllerBase
             return NotFound();
         }
         return Ok(item);
+    }
+
+    /// <summary>
+    /// Dev-only endpoint: retrieves the last email token captured by EmailService in development mode.
+    /// </summary>
+    [HttpGet]
+    public IActionResult GetDevEmailToken(string email)
+    {
+        if (!GlobalVar.IsDev)
+            return NotFound();
+
+        if (EmailService.DevEmailStore.TryGetValue(email, out var record))
+            return Ok(new { record.Email, record.Token, record.Type });
+
+        return NotFound();
+    }
+
+    /// <summary>
+    /// Dev-only endpoint: clears the dev email token store.
+    /// </summary>
+    [HttpPost]
+    public IActionResult ClearDevEmailStore()
+    {
+        if (!GlobalVar.IsDev)
+            return NotFound();
+
+        EmailService.DevEmailStore.Clear();
+        return Ok();
     }
 
     public record TestDBWriteRequest(string key, string value);

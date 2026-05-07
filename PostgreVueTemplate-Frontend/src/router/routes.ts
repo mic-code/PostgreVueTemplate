@@ -10,6 +10,10 @@ const routes: RouteRecordRaw[] =
 		children: [
 			{ path: "", component: () => import("../pages/Test.vue") },
 			{ path: "signin", component: () => import("../pages/Signin.vue") },
+			{ path: "register", component: () => import("../pages/Register.vue") },
+			{ path: "forgetPass", component: () => import("../pages/ForgetPass.vue") },
+			{ path: "resetPass", component: () => import("../pages/ResetPass.vue") },
+			{ path: "confirmEmail", component: () => import("../pages/ConfirmEmail.vue") },
 			{ path: "test", component: () => import("../pages/Test.vue") },
 			{ path: "sample", component: () => import("../pages/Sample.vue") },
 			{ path: "sample2", component: () => import("../pages/Sample2.vue") },
